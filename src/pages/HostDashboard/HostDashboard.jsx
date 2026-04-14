@@ -3,7 +3,7 @@ import API from "../../services/api";
 import "./HostDashBoard.css";
 import { toast } from "react-toastify";
 
-export default function HostDashboard() {
+export default function HostDashBoard() {
   const [cars, setCars] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [editCar, setEditCar] = useState(null);

@@ -14,7 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const UserDashboard = () => {
+const UserDashBoard = () => {
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
   const [totalSpent, setTotalSpent] = useState(0);
@@ -219,4 +219,4 @@ const UserDashboard = () => {
   );
 };
 
-export default UserDashboard;
+export default UserDashBoard;
