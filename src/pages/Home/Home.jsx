@@ -20,10 +20,13 @@ function Home() {
     try {
       const response = await API.get("/cars/all-cars");
       setCars(response.data);
+       console.log("cars", response.data);
     } catch (err) {
       console.log(err);
     }
   };
+
+ 
 
   return (
     <div className="bg-white min-h-screen">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import API from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Mail, Lock, UserCircle, ShieldCheck, ArrowRight, Car } from "lucide-react";
+import { User, Mail, Lock, UserCircle, ShieldCheck, ArrowRight, Car, PhoneCall } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function Register() {
@@ -9,7 +9,8 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
-    role: "user"
+    role: "user",
+    phoneNumber:""
   });
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +36,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-      {/* Background Accent */}
+  
       <div className="absolute top-0 left-0 w-full h-80 bg-black z-0"></div>
       
       <div className="relative z-10 w-full max-w-lg">
@@ -50,7 +51,7 @@ export default function Register() {
         <div className="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* Role Selection Tabs */}
+ 
             <div className="flex gap-4 mb-6">
               <button
                 type="button"
@@ -74,7 +75,7 @@ export default function Register() {
               </button>
             </div>
 
-            {/* Name Input */}
+   
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
               <div className="relative">
@@ -89,7 +90,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Email Input */}
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
               <div className="relative">
@@ -105,7 +106,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Password Input */}
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
               <div className="relative">
@@ -114,6 +115,20 @@ export default function Register() {
                   name="password"
                   type="password"
                   placeholder="Min. 6 characters"
+                  required
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                />
+              </div> 
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone </label>
+              <div className="relative">
+                <PhoneCall className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                <input
+                  name="phoneNumber"
+                  type="tel"
+                  placeholder="10 digit Number Only"
                   required
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"

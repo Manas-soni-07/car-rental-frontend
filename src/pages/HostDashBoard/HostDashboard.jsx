@@ -186,6 +186,10 @@ const updateCar = async (carId, updatedData) => {
                 {new Date(b.startDate).toDateString()} -{" "}
                 {new Date(b.endDate).toDateString()}
               </p>
+              <p>
+               📞Contact : {b.phoneNumber}  
+
+              </p>
               <p>₹ {b.totalPrice}</p>
 
               <span className={`status ${b.status}`}>{b.status}</span>

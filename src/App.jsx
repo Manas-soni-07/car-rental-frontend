@@ -18,13 +18,13 @@ function App() {
   return (
     <>
     <Navbar/>
-    <div className="pt-20 md:pt-18"> 
+    <div className="pt-15 md:pt-15"> 
     <Routes>
       <Route path='/' element={<Home/>}/>
       <Route path='/login' element={<Login/>}/>
       <Route path='/register' element={<Register/>}/>
       <Route path='/car/:id' element={<CarDetails />}/>
-      <Route path='/my-bookings' element={<MyBookings/>} />
+      {/* <Route path='/my-bookings' element={<MyBookings/>} /> */}
       <Route  path='/host/add-car' element={<HostAddCar/>} />
       <Route  path='/host/dashboard' element={<HostDashBoard/>} />
       <Route path="/user/dashboard" element={<UserDashboard />} />

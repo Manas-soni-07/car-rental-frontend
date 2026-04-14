@@ -6,8 +6,8 @@ import {
   Clock,
   Calendar,
   MapPin,
+  X,
   XCircle,
-  CheckCircle,
   ChevronRight,
   LayoutDashboard,
 } from "lucide-react";
@@ -51,6 +51,10 @@ const UserDashboard = () => {
     }
   };
 
+  const removeFromUI = (id) => {
+    setBookings((prev) => prev.filter((b) => b._id !== id));
+  };
+
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -61,7 +65,6 @@ const UserDashboard = () => {
   return (
     <div className="bg-gray-50 min-h-screen pt-28 pb-12 px-6 md:px-12">
       <div className="max-w-6xl mx-auto">
-
         {/* Header */}
         <div className="mb-10 flex items-center gap-4">
           <div className="bg-blue-600 p-3 rounded-2xl shadow-lg">
@@ -104,23 +107,18 @@ const UserDashboard = () => {
           <div className="bg-black p-6 rounded-2xl shadow-xl flex items-center gap-5 text-white">
             <Clock size={32} />
             <div>
-              <p className="text-xs uppercase text-gray-400">
-                Account Status
-              </p>
+              <p className="text-xs uppercase text-gray-400">Account Status</p>
               <p className="text-2xl font-bold">Verified User</p>
             </div>
           </div>
         </div>
 
-        {/* All Bookings Section */}
         <h2 className="text-2xl font-bold mb-6">Your Bookings</h2>
 
         {bookings.length === 0 ? (
           <div className="bg-white p-16 rounded-2xl text-center shadow-sm">
             <Car size={40} className="mx-auto text-blue-600 mb-4" />
-            <p className="text-gray-500">
-              You haven't made any bookings yet.
-            </p>
+            <p className="text-gray-500">You haven't made any bookings yet.</p>
             <Link
               to="/"
               className="mt-4 inline-flex items-center gap-2 bg-black text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition"
@@ -133,56 +131,85 @@ const UserDashboard = () => {
             {bookings.map((b) => (
               <div
                 key={b._id}
-                className="bg-white rounded-2xl shadow-sm border p-6 flex flex-col"
+                className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition duration-300 relative"
               >
-                <h3 className="text-xl font-bold">
-                  {b.car?.name}
-                </h3>
+                <button
+                  onClick={() => removeFromUI(b._id)}
+                  className="absolute top-50 right-3 bg-white/80 backdrop-blur p-1 rounded-full hover:text-red-500"
+                >
+                  <X size={18} />
+                </button>
 
-                <p className="text-sm text-blue-600 font-semibold mb-4">
-                  {b.car?.brand}
-                </p>
-
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} />
-                    {new Date(b.startDate).toLocaleDateString()} -{" "}
-                    {new Date(b.endDate).toLocaleDateString()}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    {b.car?.location || "Main Showroom"}
-                  </div>
+                <div className="h-48 w-full overflow-hidden">
+                  <img
+                    src={
+                      b.car?.images?.length > 0
+                        ? `http://localhost:5000${b.car.images[0]}`
+                        : "/images/car-placeholder.jpg"
+                    }
+                    alt={b.car?.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    onError={(e) => {
+                      e.target.src = "/images/car-placeholder.jpg";
+                    }}
+                  />
                 </div>
 
-                <div className="mt-auto flex justify-between items-center">
-                  <p className="font-black text-lg">
-                    ₹{b.totalPrice}
+                <div className="p-6 flex flex-col">
+                  <h3 className="text-xl font-bold">{b.car?.name}</h3>
+
+                  <p className="text-sm text-blue-600 font-semibold mb-3">
+                    {b.car?.brand}
                   </p>
 
-                  <div className="flex gap-3">
-                    {b.status !== "cancelled" && (
-                      <button
-                        onClick={() => cancelBooking(b._id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <XCircle size={22} />
-                      </button>
-                    )}
+                  <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} />
+                      {new Date(b.startDate).toLocaleDateString()} -
+                      {new Date(b.endDate).toLocaleDateString()}
+                    </div>
 
-                    <Link
-                      to={`/car/${b.car?._id}`}
-                      className="text-black hover:text-blue-600"
-                    >
-                      <ChevronRight size={22} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <MapPin size={16} />
+                      {b.car?.location || "Main Showroom"}
+                    </div>
                   </div>
-                </div>
 
-                <span className="mt-4 text-xs font-bold uppercase">
-                  Status: {b.status}
-                </span>
+                  <div className="flex justify-between items-center mt-auto">
+                    <p className="text-xl font-black">₹{b.totalPrice}</p>
+
+                    <div className="flex gap-3">
+                      {b.status !== "cancelled" && (
+                        <button
+                          onClick={() => cancelBooking(b._id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <XCircle size={22} />
+                        </button>
+                      )}
+
+                      <Link
+                        to={`/car/${b.car?._id}`}
+                        className="text-black hover:text-blue-600"
+                      >
+                        <ChevronRight size={22} />
+                      </Link>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`mt-4 text-xs font-bold px-3 py-1 rounded-full w-fit
+            ${
+              b.status === "pending"
+                ? "bg-yellow-100 text-yellow-700"
+                : b.status === "confirmed"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+            }`}
+                  >
+                    {b.status}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

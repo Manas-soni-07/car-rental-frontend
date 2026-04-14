@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -100,95 +102,94 @@ function MyBookings() {
               Start Exploring <ChevronRight size={20} />
             </Link>
           </div>
-         ) : (
-       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-10">
-  {bookings.map((b) => (
-    <div
-      key={b._id}
-      className="group bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col"
-    >
-      {/* Image */}
-      <div className="relative w-full h-60 overflow-hidden">
-        <img
-          src={
-            b.car?.image
-              ? `http://localhost:5000${b.car.image}`
-              : b.car?.images?.[0]
-              ? `http://localhost:5000${b.car.images[0]}`
-              : "https://via.placeholder.com/600x400"
-          }
-          alt={b.car?.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-          onError={(e) => {
-            e.target.src = "https://via.placeholder.com/600x400";
-          }}
-        />
-
-        {/* Status Badge */}
-        <div className="absolute top-4 left-4">
-          <StatusBadge status={b.status} />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-6 flex flex-col flex-grow">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition">
-            {b.car?.name || "Premium Car"}
-          </h2>
-
-          <p className="text-sm text-blue-600 font-semibold uppercase tracking-wider mb-4">
-            {b.car?.brand}
-          </p>
-
-          {/* Info Box */}
-          <div className="bg-gray-50 p-4 rounded-xl space-y-3 text-sm text-gray-700">
-            <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-blue-500" />
-              {new Date(b.startDate).toLocaleDateString("en-GB")} —{" "}
-              {new Date(b.endDate).toLocaleDateString("en-GB")}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <MapPin size={16} className="text-blue-500" />
-              {b.car?.location || "Main Showroom"}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Section */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-          <div>
-            <p className="text-xs text-gray-400 uppercase font-semibold">
-              Total Price
-            </p>
-            <p className="text-xl font-bold text-gray-900">
-              ₹{b.totalPrice.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            {b.status !== "cancelled" && (
-              <button
-                onClick={() => cancelBooking(b._id)}
-                className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-10">
+            {bookings.map((b) => (
+              <div
+                key={b._id}
+                className="group bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col"
               >
-                <XCircle size={20} />
-              </button>
-            )}
+      
+                <div className="relative w-full h-60 overflow-hidden">
+                  <img
+                    src={
+                      b.car?.images?.length > 0
+                        ? `http://localhost:5000${b.car.images[0]}`
+                        : "/images/car-placeholder.jpg"
+                    }
+                    alt={b.car?.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    onError={(e) => {
+                      e.target.src = "/images/car-placeholder.jpg";
+                    }}
+                  />
 
-            <Link
-              to={`/car/${b.car?._id}`}
-              className="p-2 bg-black text-white rounded-lg hover:bg-blue-600 transition"
-            >
-              <ChevronRight size={20} />
-            </Link>
+             
+                  <div className="absolute top-4 left-4">
+                    <StatusBadge status={b.status} />
+                  </div>
+                </div>
+
+         
+                <div className="p-6 flex flex-col flex-grow">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition">
+                      {b.car?.name || "Premium Car"}
+                    </h2>
+
+                    <p className="text-sm text-blue-600 font-semibold uppercase tracking-wider mb-4">
+                      {b.car?.brand}
+                    </p>
+
+                    {/* Info Box */}
+                    <div className="bg-gray-50 p-4 rounded-xl space-y-3 text-sm text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-blue-500" />
+                        {new Date(b.startDate).toLocaleDateString(
+                          "en-GB",
+                        )} — {new Date(b.endDate).toLocaleDateString("en-GB")}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <MapPin size={16} className="text-blue-500" />
+                        {b.car?.location || "Main Showroom"}
+                      </div>
+                    </div>
+                  </div>
+
+         
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+                    <div>
+                      <p className="text-xs text-gray-400 uppercase font-semibold">
+                        Total Price
+                      </p>
+                      <p className="text-xl font-bold text-gray-900">
+                        ₹{b.totalPrice.toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3">
+                      {b.status !== "cancelled" && (
+                        <button
+                          onClick={() => cancelBooking(b._id)}
+                          className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
+                        >
+                          <XCircle size={20} />
+                        </button>
+                      )}
+
+                      <Link
+                        to={`/car/${b.car?._id}`}
+                        className="p-2 bg-black text-white rounded-lg hover:bg-blue-600 transition"
+                      >
+                        <ChevronRight size={20} />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
         )}
       </div>
     </div>
