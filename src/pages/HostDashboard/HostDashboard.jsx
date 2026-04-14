@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../../services/api";
-import "./HostDashboard.css";
+import "./HostDashBoard.css";
 import { toast } from "react-toastify";
 
 export default function HostDashboard() {

@@ -10,7 +10,7 @@ import Home from './pages/Home/Home'
 import Navbar from './component/Navbar/Navbar'
 import CarDetails from './pages/CarDetails/CarDetails'
 import MyBookings from './pages/MyBookings/MyBookings'
-import HostAddCar from './pages/HostDashboard/HostAddCar'
+import HostAddCar from './pages/HostDashBoard/HostAddCar'
 import UserDashboard from './pages/UserDashBoard/UserDashBoard';
 import HostDashboard from './pages/HostDashBoard/HostDashBoard';
 
