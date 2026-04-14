@@ -12,7 +12,7 @@ import CarDetails from './pages/CarDetails/CarDetails'
 import MyBookings from './pages/MyBookings/MyBookings'
 import UserDashboard from './pages/UserDashBoard/UserDashBoard'
 import HostAddCar from './pages/HostDashBoard/HostAddCar'
-import HostDashBoard from './pages/HostDashBoard/HostDashBoard'
+import HostDashBoard from './pages/HostDashBoard/HostDashboard'
 
 function App() {
   return (
