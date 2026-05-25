@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { buildAssetUrl } from "../../utils/config";
 
 const UserDashBoard = () => {
   const [loading, setLoading] = useState(true);
@@ -30,10 +31,13 @@ const UserDashBoard = () => {
 
       setBookings(data);
 
-      const total = data.reduce((sum, b) => sum + b.totalPrice, 0);
+      const total = data.reduce(
+        (sum, b) => sum + (b.totalAmount || b.totalPrice || 0),
+        0,
+      );
       setTotalSpent(total);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      toast.error("Dashboard data load nahi ho pa raha hai.");
     } finally {
       setLoading(false);
     }
@@ -45,9 +49,9 @@ const UserDashBoard = () => {
 
     try {
       await API.put(`/bookings/cancel/${id}`);
-      setBookings((prev) => prev.filter((b) => b._id !== id));
-    } catch (err) {
-      toast("Failed to cancel booking.");
+      fetchBookings();
+    } catch {
+      toast.error("Failed to cancel booking.");
     }
   };
 
@@ -144,7 +148,7 @@ const UserDashBoard = () => {
                   <img
                     src={
                       b.car?.images?.length > 0
-                        ? `http://localhost:5000${b.car.images[0]}`
+                        ? buildAssetUrl(b.car.images[0])
                         : "/images/car-placeholder.jpg"
                     }
                     alt={b.car?.name}
@@ -176,10 +180,13 @@ const UserDashBoard = () => {
                   </div>
 
                   <div className="flex justify-between items-center mt-auto">
-                    <p className="text-xl font-black">₹{b.totalPrice}</p>
+                    <p className="text-xl font-black">
+                      ₹{(b.totalAmount || b.totalPrice || 0).toLocaleString()}
+                    </p>
 
                     <div className="flex gap-3">
-                      {b.status !== "cancelled" && (
+                      {(b.bookingStatus || b.status) !== "cancelled" &&
+                        b.rideStatus !== "completed" && (
                         <button
                           onClick={() => cancelBooking(b._id)}
                           className="text-red-500 hover:text-red-700"
@@ -197,18 +204,11 @@ const UserDashBoard = () => {
                     </div>
                   </div>
 
-                  <span
-                    className={`mt-4 text-xs font-bold px-3 py-1 rounded-full w-fit
-            ${
-              b.status === "pending"
-                ? "bg-yellow-100 text-yellow-700"
-                : b.status === "confirmed"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-            }`}
-                  >
-                    {b.status}
-                  </span>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <StatusPill label="Booking" status={b.bookingStatus || b.status} />
+                    <StatusPill label="Ride" status={b.rideStatus || "upcoming"} />
+                    <StatusPill label="Payment" status={b.paymentStatus || "unpaid"} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -216,6 +216,22 @@ const UserDashBoard = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const StatusPill = ({ label, status }) => {
+  const positive = ["accepted", "confirmed", "released", "completed"];
+  const warning = ["pending", "upcoming", "unpaid", "held", "ongoing"];
+  const className = positive.includes(status)
+    ? "bg-green-100 text-green-700"
+    : warning.includes(status)
+      ? "bg-yellow-100 text-yellow-700"
+      : "bg-red-100 text-red-700";
+
+  return (
+    <span className={`text-xs font-bold px-3 py-1 rounded-full w-fit ${className}`}>
+      {label}: {status}
+    </span>
   );
 };
 

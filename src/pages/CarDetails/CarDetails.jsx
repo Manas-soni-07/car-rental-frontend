@@ -11,89 +11,88 @@ import {
   CreditCard,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { buildAssetUrl } from "../../utils/config";
 
 function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [car, setCar] = useState(null);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
-  const [disabledDates, setDisabledDates] = useState([]);
+
+  useEffect(() => {
+    const fetchCar = async () => {
+      try {
+        const res = await API.get(`/cars/${id}`);
+        setCar(res.data?.data || res.data?.car || res.data);
+      } catch {
+        toast.error("Car details load nahi ho pa rahi hain.");
+      }
+    };
+
+    fetchCar();
+  }, [id]);
 
   const calculateDays = () => {
     if (!startDate || !endDate) return 0;
-    const diff = endDate - startDate;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diff = end - start;
     return diff >= 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1 : 0;
   };
 
   const days = calculateDays();
-  const totalPrice = car ? days * car.pricePerDay : 0;
+  const rentalPrice = car ? days * car.pricePerDay : 0;
+  const serviceFee = days > 0 ? 499 : 0;
+  const totalPrice = rentalPrice + serviceFee;
 
-  useEffect(() => {
-    fetchCar();
-    fetchBookedDates();
-  }, [id]);
+  const handleBooking = async () => {
+    if (!startDate || !endDate) {
+      toast.error("Please select dates");
+      return;
+    }
 
-  const fetchCar = async () => {
+    if (!phoneNumber.trim()) {
+      toast.error("Please enter phone number");
+      return;
+    }
+
+    let start = startDate;
+    let end = endDate;
+
+    if (new Date(startDate) > new Date(endDate)) {
+      start = endDate;
+      end = startDate;
+    }
+
+    setLoading(true);
     try {
-      const res = await API.get(`/cars/${id}`);
-      setCar(res.data);
-    } catch (err) {
-      console.log(err);
+      await API.post("/bookings/create", {
+        carId: car._id,
+        startDate: start,
+        endDate: end,
+        phoneNumber,
+      });
+
+      toast.success("Booking successful");
+      navigate("/user/dashboard");
+    } catch {
+      toast.error("Car already booked for selected dates");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchBookedDates = async () => {
-    try {
-      const res = await API.get(`/bookings/booked-dates/${id}`);
-      setDisabledDates(res.data.dates.map((d) => new Date(d)));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-const handleBooking = async () => {
-  if (!startDate || !endDate) return toast("Please select dates");
-
-  let start = startDate;
-  let end = endDate;
-
-  if (new Date(startDate) > new Date(endDate)) {
-    start = endDate;
-    end = startDate;
-  }
-
-  setLoading(true);
-  try {
-    await API.post("/bookings/create", {
-      carId: car._id,
-      startDate: start,
-      endDate: end,
-      phoneNumber,
-    });
-
-    toast("Booking successful 🎉");
-    navigate("/user/dashboard");
-  } catch (err) {
-    toast("Car already booked for selected dates");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  console.log("startdate", startDate, endDate);
-
-  if (!car)
+  if (!car) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-600"></div>
       </div>
     );
+  }
 
   return (
     <div className="bg-gradient-to-br from-gray-100 via-white to-gray-200 min-h-screen pt-24 pb-16 px-4 md:px-8">
@@ -113,7 +112,7 @@ const handleBooking = async () => {
           <div className="lg:col-span-2 space-y-8">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl group">
               <img
-                src={`http://localhost:5000${car.images[0]}`}
+                src={buildAssetUrl(car.images?.[0])}
                 alt={car.name}
                 className="w-full h-[450px] object-cover group-hover:scale-105 transition duration-700"
               />
@@ -162,7 +161,7 @@ const handleBooking = async () => {
                   <span className="text-xs text-gray-400 uppercase font-bold">
                     Location
                   </span>
-                  <span className="font-semibold">{car.location}</span>
+                  <span className="font-semibold">{car.city || car.location}</span>
                 </div>
               </div>
 
@@ -170,7 +169,7 @@ const handleBooking = async () => {
                 <h3 className="text-2xl font-bold mb-4">About this car</h3>
                 <p className="text-gray-600 leading-relaxed text-lg">
                   Enjoy a premium driving experience with the {car.name}.
-                  Perfect for city rides and long road trips in {car.location}.
+                  Perfect for city rides and long road trips in {car.city || car.location}.
                   Includes insurance, sanitized interiors, and 24/7 support.
                 </p>
               </div>
@@ -185,7 +184,7 @@ const handleBooking = async () => {
                   Book Now
                 </h3>
                 <div>
-                  <p className="text-3xl font-bold">₹{car.pricePerDay}</p>
+                  <p className="text-3xl font-bold">Rs. {car.pricePerDay}</p>
                   <span className="text-gray-400 text-sm">per day</span>
                 </div>
               </div>
@@ -197,6 +196,7 @@ const handleBooking = async () => {
                   </label>
                   <input
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
                     onChange={(e) => setStartDate(e.target.value)}
                   />
@@ -208,6 +208,7 @@ const handleBooking = async () => {
                   </label>
                   <input
                     type="date"
+                    min={startDate || new Date().toISOString().split("T")[0]}
                     className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
                     onChange={(e) => setEndDate(e.target.value)}
                   />
@@ -218,6 +219,7 @@ const handleBooking = async () => {
                   </label>
                   <input
                     type="tel"
+                    value={phoneNumber}
                     className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
                     onChange={(e) => setPhoneNumber(e.target.value)}
                   />
@@ -228,19 +230,19 @@ const handleBooking = async () => {
                 <div className="mt-8 bg-blue-50 p-5 rounded-2xl space-y-3">
                   <div className="flex justify-between">
                     <span>
-                      ₹{car.pricePerDay} x {days} days
+                      Rs. {car.pricePerDay} x {days} days
                     </span>
-                    <span>₹{car.pricePerDay * days}</span>
+                    <span>Rs. {rentalPrice}</span>
                   </div>
 
                   <div className="flex justify-between">
                     <span>Service Fee</span>
-                    <span>₹499</span>
+                    <span>Rs. {serviceFee}</span>
                   </div>
 
                   <div className="border-t pt-3 flex justify-between font-bold text-lg text-blue-800">
                     <span>Total</span>
-                    <span>₹{totalPrice}</span>
+                    <span>Rs. {totalPrice}</span>
                   </div>
                 </div>
               )}
@@ -264,4 +266,5 @@ const handleBooking = async () => {
     </div>
   );
 }
+
 export default CarDetails;

@@ -11,8 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { buildAssetUrl } from "../../utils/config";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -27,8 +26,8 @@ function MyBookings() {
       const res = await API.get("/bookings/my-bookings");
 
       setBookings(res.data.data || []);
-    } catch (err) {
-      console.log(err);
+    } catch {
+      toast.error("Bookings load nahi ho pa rahi hain.");
     } finally {
       setLoading(false);
     }
@@ -40,9 +39,9 @@ function MyBookings() {
     try {
       await API.put(`/bookings/cancel/${id}`);
 
-      setBookings((prev) => prev.filter((b) => b._id !== id));
-    } catch (err) {
-      toast("Failed to cancel booking.");
+      fetchBookings();
+    } catch {
+      toast.error("Failed to cancel booking.");
     }
   };
 
@@ -114,7 +113,7 @@ function MyBookings() {
                   <img
                     src={
                       b.car?.images?.length > 0
-                        ? `http://localhost:5000${b.car.images[0]}`
+                        ? buildAssetUrl(b.car.images[0])
                         : "/images/car-placeholder.jpg"
                     }
                     alt={b.car?.name}
@@ -126,7 +125,7 @@ function MyBookings() {
 
              
                   <div className="absolute top-4 left-4">
-                    <StatusBadge status={b.status} />
+                    <StatusBadge label="Booking" status={b.bookingStatus || b.status} />
                   </div>
                 </div>
 
@@ -154,6 +153,14 @@ function MyBookings() {
                         <MapPin size={16} className="text-blue-500" />
                         {b.car?.location || "Main Showroom"}
                       </div>
+
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <StatusBadge label="Ride" status={b.rideStatus || "upcoming"} />
+                        <StatusBadge
+                          label="Payment"
+                          status={b.paymentStatus || "unpaid"}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -164,12 +171,13 @@ function MyBookings() {
                         Total Price
                       </p>
                       <p className="text-xl font-bold text-gray-900">
-                        ₹{b.totalPrice.toLocaleString()}
+                        ₹{(b.totalAmount || b.totalPrice || 0).toLocaleString()}
                       </p>
                     </div>
 
                     <div className="flex gap-3">
-                      {b.status !== "cancelled" && (
+                      {(b.bookingStatus || b.status) !== "cancelled" &&
+                        b.rideStatus !== "completed" && (
                         <button
                           onClick={() => cancelBooking(b._id)}
                           className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
@@ -196,19 +204,35 @@ function MyBookings() {
   );
 }
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, label }) => {
   const styles = {
     confirmed: "bg-green-500/90 text-white border-white/20",
+    accepted: "bg-green-500/90 text-white border-white/20",
     pending: "bg-amber-500/90 text-white border-white/20",
+    upcoming: "bg-amber-500/90 text-white border-white/20",
+    unpaid: "bg-amber-500/90 text-white border-white/20",
     cancelled: "bg-gray-500/90 text-white border-white/20",
+    rejected: "bg-red-500/90 text-white border-white/20",
+    refunded: "bg-gray-500/90 text-white border-white/20",
     completed: "bg-blue-500/90 text-white border-white/20",
+    ongoing: "bg-sky-500/90 text-white border-white/20",
+    held: "bg-sky-500/90 text-white border-white/20",
+    released: "bg-green-500/90 text-white border-white/20",
   };
 
   const Icons = {
     confirmed: <CheckCircle size={14} />,
+    accepted: <CheckCircle size={14} />,
     pending: <Clock size={14} />,
+    upcoming: <Clock size={14} />,
+    unpaid: <Clock size={14} />,
     cancelled: <XCircle size={14} />,
+    rejected: <XCircle size={14} />,
+    refunded: <XCircle size={14} />,
     completed: <CheckCircle size={14} />,
+    ongoing: <Clock size={14} />,
+    held: <Clock size={14} />,
+    released: <CheckCircle size={14} />,
   };
 
   return (
@@ -218,6 +242,7 @@ const StatusBadge = ({ status }) => {
       }`}
     >
       {Icons[status] || Icons.pending}
+      {label ? `${label}: ` : ""}
       {status}
     </span>
   );

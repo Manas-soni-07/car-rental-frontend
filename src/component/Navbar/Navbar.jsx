@@ -1,14 +1,14 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, LogOut, Car } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user, logout: logoutUser } = useAuth();
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const logout = async () => {
+    await logoutUser();
     navigate("/login");
   };
 
@@ -41,21 +41,34 @@ export default function Navbar() {
               </Link>
             </div>
           )}
+
           {user && (
             <div className="flex items-center gap-6">
-              {/* Home */}
               <Link to="/" className="border-r border-white/20 pr-6">
                 Home
               </Link>
+              <Link
+                to="/search"
+                className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
+              >
+                Search
+              </Link>
 
-              {/* Dashboard Based on Role */}
               {user.role === "user" && (
-                <Link
-                  to="/user/dashboard"
-                  className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
-                >
-                  User Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/user/dashboard"
+                    className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
+                  >
+                    User Dashboard
+                  </Link>
+                  <Link
+                    to="/my-bookings"
+                    className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
+                  >
+                    My Bookings
+                  </Link>
+                </>
               )}
 
               {user.role === "host" && (
@@ -71,22 +84,37 @@ export default function Navbar() {
                     to="/host/add-car"
                     className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
                   >
-                    ➕ Add Car
+                    Add Car
                   </Link>
                 </>
               )}
 
-              {/* Profile */}
+              {user.role === "admin" && (
+                <>
+                  <Link
+                    to="/admin/dashboard"
+                    className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <Link
+                    to="/admin/users"
+                    className="hidden md:block text-sm font-medium text-gray-300 hover:text-white transition border-r border-white/20 pr-6"
+                  >
+                    Users
+                  </Link>
+                </>
+              )}
+
               <div className="flex items-center gap-3 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
                 <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center">
                   <User size={16} />
                 </div>
                 <span className="text-sm font-semibold hidden sm:inline-block">
-                  {user.name.split(" ")[0]}
+                  {user.name?.split(" ")[0] || "User"}
                 </span>
               </div>
 
-              {/* Logout */}
               <button
                 onClick={logout}
                 className="flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors text-sm font-medium"

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import API from "../../services/api";
 import { toast } from "react-toastify";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Car } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -12,6 +13,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const { setUser } = useAuth();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,14 +25,22 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await API.post("/auth/login", form);
+      const loggedInUser = res.data?.data?.user;
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(loggedInUser || null);
 
-      navigate("/");
-      window.location.reload(); 
+      const fallbackPath =
+        loggedInUser?.role === "admin"
+          ? "/admin/dashboard"
+          : loggedInUser?.role === "host"
+            ? "/host/dashboard"
+            : "/";
+
+      navigate(location.state?.from?.pathname || fallbackPath);
     } catch (err) {
-      toast.error(err.response?.data?.msg || "Invalid Credentials");
+      toast.error(err.response?.data?.message || "Invalid Credentials");
     } finally {
       setLoading(false);
     }

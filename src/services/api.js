@@ -1,16 +1,25 @@
 import axios from "axios";
+import { API_BASE_URL } from "../utils/config";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  withCredentials: true,
 });
 
-// ✅ token auto attach hoga
-API.interceptors.request.use((config)=>{
-  const token = localStorage.getItem("token");
-  if(token){
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+API.interceptors.request.use((config) => {
   return config;
 });
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+    return Promise.reject(error);
+  },
+);
 
 export default API;

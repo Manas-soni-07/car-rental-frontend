@@ -3,6 +3,7 @@ import API from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Lock, UserCircle, ShieldCheck, ArrowRight, Car, PhoneCall } from "lucide-react";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -15,6 +16,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,11 +26,22 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      await API.post("/auth/register", form);
+      const res = await API.post("/auth/register", form);
+      const registeredUser = res.data?.data?.user;
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(registeredUser || null);
       toast("Account created successfully!")
-      navigate("/login");
+      navigate(
+        registeredUser?.role === "admin"
+          ? "/admin/dashboard"
+          : registeredUser?.role === "host"
+            ? "/host/dashboard"
+            : "/",
+      );
     } catch (err) {
-   toast.error(err.response?.data?.msg || "Registration failed");
+   toast.error(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -104,6 +117,11 @@ export default function Register() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
                 />
               </div>
+              {form.email.trim().toLowerCase() === "taramanisoni87@gmail.com" && (
+                <p className="mt-2 text-xs font-semibold text-blue-600">
+                  This test email will be registered as Admin automatically.
+                </p>
+              )}
             </div>
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import API from "../../services/api";
 import {
   Car,
@@ -19,16 +19,30 @@ export default function HostAddCar() {
     transmission: "Manual",
     seatingCapacity: 5,
     location: "",
+    city: "",
+    state: "",
+    country: "India",
+    lat: "",
+    lng: "",
+    isAvailable: true,
+    selfDrive: true,
   });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setCarData({ ...carData, image: e.target.files[0].name });
   };
+
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,9 +62,16 @@ export default function HostAddCar() {
         transmission: "Manual",
         seatingCapacity: 5,
         location: "",
+        city: "",
+        state: "",
+        country: "India",
+        lat: "",
+        lng: "",
+        isAvailable: true,
+        selfDrive: true,
       });
-    } catch (err) {
-      toast("Error adding car");
+    } catch {
+      toast.error("Error adding car");
     }
   };
 
@@ -76,6 +97,7 @@ export default function HostAddCar() {
               {preview ? (
                 <img
                   src={preview}
+                  alt="Car preview"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
@@ -86,7 +108,7 @@ export default function HostAddCar() {
               )}
               <input
                 type="file"
-                value={carData.file}
+                accept="image/*"
                 onChange={handleImageChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
                 required
@@ -135,6 +157,41 @@ export default function HostAddCar() {
                 }
                 className="w-full pl-12 p-4 bg-gray-50 rounded-2xl outline-none"
                 required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                placeholder="City"
+                value={carData.city}
+                onChange={(e) => setCarData({ ...carData, city: e.target.value })}
+                className="w-full p-4 bg-gray-50 rounded-2xl outline-none"
+                required
+              />
+              <input
+                placeholder="State"
+                value={carData.state}
+                onChange={(e) => setCarData({ ...carData, state: e.target.value })}
+                className="w-full p-4 bg-gray-50 rounded-2xl outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="number"
+                step="any"
+                placeholder="Latitude"
+                value={carData.lat}
+                onChange={(e) => setCarData({ ...carData, lat: e.target.value })}
+                className="w-full p-4 bg-gray-50 rounded-2xl outline-none"
+              />
+              <input
+                type="number"
+                step="any"
+                placeholder="Longitude"
+                value={carData.lng}
+                onChange={(e) => setCarData({ ...carData, lng: e.target.value })}
+                className="w-full p-4 bg-gray-50 rounded-2xl outline-none"
               />
             </div>
 
@@ -188,6 +245,25 @@ export default function HostAddCar() {
                 }
                 className="bg-transparent w-full outline-none font-bold"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm font-semibold text-gray-700">
+              <label className="flex items-center gap-2 bg-gray-50 p-4 rounded-2xl">
+                <input
+                  type="checkbox"
+                  checked={carData.isAvailable}
+                  onChange={(e) => setCarData({ ...carData, isAvailable: e.target.checked })}
+                />
+                Available
+              </label>
+              <label className="flex items-center gap-2 bg-gray-50 p-4 rounded-2xl">
+                <input
+                  type="checkbox"
+                  checked={carData.selfDrive}
+                  onChange={(e) => setCarData({ ...carData, selfDrive: e.target.checked })}
+                />
+                Self-drive
+              </label>
             </div>
 
             <button

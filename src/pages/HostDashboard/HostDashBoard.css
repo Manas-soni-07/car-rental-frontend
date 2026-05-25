@@ -132,11 +132,19 @@
 .status {
   display: inline-block;
   margin-top: 8px;
+  margin-right: 6px;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
   text-transform: capitalize;
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 /* Status Colors */
@@ -147,14 +155,40 @@
 }
 
 .status.confirmed,
-.status.Confirmed {
+.status.Confirmed,
+.status.accepted,
+.status.held,
+.status.released,
+.status.completed {
   background: #d4edda;
   color: #155724;
 }
 
-.status.rejected {
+.status.rejected,
+.status.cancelled,
+.status.refunded {
   background: #f8d7da;
   color: #721c24;
+}
+
+.status.pending,
+.status.upcoming,
+.status.unpaid {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.ongoing {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 180px;
 }
 
 /* Buttons */
